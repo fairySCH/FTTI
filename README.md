@@ -1,5 +1,6 @@
 Class OSSProj  
-name : Lee boseong
+name : Lee boseong  
+Date : 27. Mar, 2024  
 날짜 : 2024년 3월 27일(수)
 
 
