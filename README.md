@@ -1,6 +1,7 @@
 Class: OSSProj
-  
-  Name: JJR
+
+Name: JJR
+일자: 2024. 03. 27
 
 # 2024-1-OSSProj-ComfyRide-01
 
