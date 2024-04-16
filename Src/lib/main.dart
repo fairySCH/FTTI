@@ -57,7 +57,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('파이어베이스22테스트'),
+          title: const Text('FTTI'),
         ),
         body:
         Container(child: grid_generator(context)),
@@ -73,7 +73,7 @@ class _MyAppState extends State<MyApp> {
       return Center(child: CircularProgressIndicator()); // 로딩 인디케이터 표시
     }
     return MasonryGridView.builder(
-      gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+      gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
       itemCount: list_.length, // itemCount를 list_의 길이로 설정
       itemBuilder: (context, index) {
         return ClipRRect(
