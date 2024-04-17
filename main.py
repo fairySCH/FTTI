@@ -1,1 +1,0 @@
-print("Hello 장주리!")
