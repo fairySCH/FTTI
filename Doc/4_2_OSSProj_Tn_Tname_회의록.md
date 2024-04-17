@@ -53,7 +53,7 @@
 - 회의록은 정기 회의시에만 작성한다.
 - 금일까지 모든 팀원은 프로젝트 협업 툴 Notion, Figma 초대를 수락한다.
 
-* 회의사진
+* 회의사진  
   <img width="423" alt="0315" src="https://github.com/CSID-DGU/2024-1-OSSProj-ComfyRide-01/assets/144207567/7c0c3c85-3475-49c6-812e-e4602a7206e5">
 
 ## 2차 회의
@@ -92,5 +92,5 @@
 - 차주는 시험기간인 관계로 정기 회의는 생략하고, 4월 25일 목요일 15:00에 차기
   회의를 진행한다.
 
-* 회의사진
+* 회의사진  
   <img width="424" alt="0415" src="https://github.com/CSID-DGU/2024-1-OSSProj-ComfyRide-01/assets/144207567/149e1707-d006-4308-97b3-7f1d87d07dbd">
