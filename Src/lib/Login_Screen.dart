@@ -16,56 +16,82 @@ class _Login_ScreenState extends State<Login_Screen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('FTTI 로그인'),
+        title: Text(''),
         backgroundColor: Colors.blue,
       ),
-      body: Container(
-        color: Colors.blue,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, //수직 가운데 정렬
-          children: [
-            Center(
-              child: Text(
-                'FTTI 로그인',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                // 구글 로그인 수행
-                final UserCredential? userCredential = await signInWithGoogle();
-                // Firestore에 사용자 추가
-                await addUser(userCredential!);
-
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const StyleRecommendation()));
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: 30,
-                    height: 50,
-                    child: Image.asset(
-                      'assets/google.png',
+      body: SafeArea(
+        child: Container(
+          color: Colors.blue,
+          child: Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.start, // Align children at the start
+            children: [
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 30), // Add padding for spacing
+                  child: Text(
+                    'FTTI',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 70,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(width: 10),
-                  Text(
-                    'Google 로그인',
-                    style: TextStyle(color: Colors.black, fontSize: 17),
-                  ),
-                ],
+                ),
               ),
-            )
-          ],
+              Center(
+                child: Text(
+                  'Fashion Tendency Types Indicator',
+                  style: TextStyle(color: Colors.white, fontSize: 20),
+                ),
+              ),
+              SizedBox(height: 200),
+              Center(
+                child: Text(
+                  '알려줘, 나의 패션 코드!',
+                  style: TextStyle(color: Colors.white, fontSize: 25),
+                ),
+              ),
+              SizedBox(height: 130),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    // 구글 로그인 수행
+                    final UserCredential? userCredential =
+                        await signInWithGoogle();
+                    // Firestore에 사용자 추가
+                    await addUser(userCredential!);
+
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const StyleRecommendation(),
+                    ));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(width: 50),
+                      SizedBox(
+                        width: 30,
+                        height: 50,
+                        child: Image.asset(
+                          'assets/google.png',
+                        ),
+                      ),
+                      SizedBox(width: 15),
+                      Text(
+                        'Google로 시작하기',
+                        style: TextStyle(color: Colors.black, fontSize: 17),
+                      ),
+                      SizedBox(width: 50),
+                    ],
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
