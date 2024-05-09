@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:ossproj_comfyride/Login_Screen.dart';
+import 'package:ossproj_comfyride/explain_FTTI.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +29,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'FTTI00',
-      home: Login_Screen(),
+      home: explain_FTTI()
+
+      // Login_Screen(),
     );
   }
 }
