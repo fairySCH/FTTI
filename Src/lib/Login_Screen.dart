@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ossproj_comfyride/Style_Recommendation.dart';
+import 'package:ossproj_comfyride/choice_style.dart';
 
 class Login_Screen extends StatefulWidget {
   const Login_Screen({super.key});
@@ -63,7 +64,7 @@ class _Login_ScreenState extends State<Login_Screen> {
                     await addUser(userCredential!);
 
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const StyleRecommendation(),
+                      builder: (context) => const Choice_Style(),
                     ));
                   },
                   style: ElevatedButton.styleFrom(
