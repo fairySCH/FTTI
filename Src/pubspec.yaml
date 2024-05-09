@@ -23,6 +23,7 @@ dependencies:
   google_sign_in: ^6.2.1
   firebase_auth: ^4.19.4
   url_launcher: ^6.2.6
+  giffy_dialog: ^2.1.0
 
 
 dev_dependencies:
