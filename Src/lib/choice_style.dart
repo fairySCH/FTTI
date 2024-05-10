@@ -11,9 +11,6 @@ class Choice_Style extends StatefulWidget {
 
   @override
   State<Choice_Style> createState() => _Choice_Style();
-
-
-
 }
 
 class _Choice_Style extends State<Choice_Style> {
@@ -21,12 +18,11 @@ class _Choice_Style extends State<Choice_Style> {
   List<String> list_ = <String>[];
   List<bool> bool_Grid = [];
   bool isLoading = false; // 로딩 상태 추적
-  var count2=false;
+  var count2 = false;
   var count1 = 0;
 
   @override
   void initState() {
-
     Future.delayed(const Duration(milliseconds: 10), () {
       showDialog(
         context: context,
@@ -50,23 +46,21 @@ class _Choice_Style extends State<Choice_Style> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, 'OK'),
-                child: const Text('시작',textAlign: TextAlign.center,),
+                child: const Text(
+                  '시작',
+                  textAlign: TextAlign.center,
+                ),
               ),
             ],
           );
         },
       );
-
     });
 
     print('2');
     _loadData();
     super.initState();
-
-
   }
-
-
 
   Future<void> _loadData() async {
     if (isLoading) return; // 이미 로딩 중이면 중복 실행 방지
@@ -86,30 +80,67 @@ class _Choice_Style extends State<Choice_Style> {
 
   // @override
   Widget build(BuildContext context) {
-
-
-
     return MaterialApp(
-        home: Scaffold(
-            appBar: AppBar(
-              title: Text('취향에 맞는 옷을 선택해주세요 ' + count1.toString() + '/10개'),
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context); // 이전 화면으로 돌아감
+            },
+          ),
+          title: Text(
+            'FTTI',
+            style: TextStyle(color: Colors.white, fontSize: 30),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.blue,
+        ),
+        body: Stack(
+          children: [
+            Container(
+              color: Colors.blue,
             ),
-            body: Stack(
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 5,
+            ),
+            Column(
               children: [
-                Container(child: grid_generator()),
-
-                Positioned.fill(
-                  child: Align(
-                    alignment: Alignment.center,
-                    child:  count2 ?  SizedBox(width: 100, height: 100, child:CircularProgressIndicator()) : Container(),)
-                )
-
-
+                SizedBox(height: 10),
+                Text(
+                  '취향에 맞는 옷을 선택해주세요\n ${count1.toString()}/10개',
+                  style: TextStyle(fontSize: 20),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 20),
+                Expanded(child: grid_generator()),
               ],
             ),
-
-
-            ));
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.center,
+                child: count2
+                    ? SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: CircularProgressIndicator())
+                    : Container(),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   Widget grid_generator() {
@@ -130,9 +161,9 @@ class _Choice_Style extends State<Choice_Style> {
               setState(() {
                 count1++;
 
-                if(count1 == 10){
+                if (count1 == 10) {
                   setState(() {
-                    count2=true;
+                    count2 = true;
                   });
 
                   Future.delayed(const Duration(milliseconds: 3000), () {
@@ -145,24 +176,31 @@ class _Choice_Style extends State<Choice_Style> {
                             height: 300,
                             fit: BoxFit.cover,
                           ),
-                          title: Text('나만의 FTTI 생성이\n완료 됐습니다.', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold),),
+                          title: Text(
+                            '나만의 FTTI 생성이\n완료 됐습니다.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context),
-                              child: const Text('보러가기',textAlign: TextAlign.center,),
+                              child: const Text(
+                                '보러가기',
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ],
                         );
-                        },
+                      },
                     );
                   });
 
-                Future.delayed(const Duration(milliseconds: 3500), () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => explain_FTTI()));
-                });
-
-
-
+                  Future.delayed(const Duration(milliseconds: 3500), () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => explain_FTTI()));
+                  });
                 }
                 print(bool_Grid[index]);
                 bool_Grid[index] = !bool_Grid[index];
@@ -192,6 +230,4 @@ class _Choice_Style extends State<Choice_Style> {
       },
     );
   }
-
-
 }
