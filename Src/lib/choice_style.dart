@@ -84,8 +84,18 @@ class _Choice_Style extends State<Choice_Style> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: Text(''), backgroundColor: Colors.blue,
-          //Text('취향에 맞는 옷을 선택해주세요\n' + count1.toString() + '/10개'),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context); // 이전 화면으로 돌아감
+            },
+          ),
+          title: Text(
+            'FTTI',
+            style: TextStyle(color: Colors.white, fontSize: 30),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.blue,
         ),
         body: Stack(
           children: [

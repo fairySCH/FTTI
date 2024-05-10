@@ -44,7 +44,17 @@ class _StyleRecommendation extends State<StyleRecommendation> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: const Text(''),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context); // 이전 화면으로 돌아감
+            },
+          ),
+          title: Text(
+            'FTTI',
+            style: TextStyle(color: Colors.white, fontSize: 30),
+          ),
+          centerTitle: true,
           backgroundColor: Colors.blue,
         ),
         body: Stack(
@@ -65,8 +75,8 @@ class _StyleRecommendation extends State<StyleRecommendation> {
               children: [
                 SizedBox(height: 10),
                 Text(
-                  "편한게 최고! 일개미(O5C4F1)' 유형의\n길동님 맞춤 패션 추천", //임시 텍스트
-                  style: TextStyle(fontSize: 20), textAlign: TextAlign.center,
+                  "편한게 좋은 프로페셔널 직장인(O5C4F1)' 유형의\n길동님 맞춤 패션 추천", //임시 텍스트
+                  style: TextStyle(fontSize: 15), textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 20),
                 Expanded(
