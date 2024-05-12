@@ -154,7 +154,7 @@
     - 차기 회의는 차기 수업 시간인 수요일 수업시간에 진행하기로 함
 
 ### 회의사진
-![meeting_0429](./imgs/meeting_0429.png.png)
+![meeting_0429](./imgs/meeting_0429.png)
 
   
 # **6차 회의**
@@ -185,7 +185,7 @@
     - 차기 회의는 5월 11일 토요일 08시에 온라인으로 진행하기로 함
 
 ### 회의사진
-![meeting_0508](./imgs/meeting_0508.png.png)
+![meeting_0508](./imgs/meeting_0508.png)
 
   
 # **7차 회의**
