@@ -35,9 +35,7 @@
     - 금일까지 모든 팀원은 프로젝트 협업 툴 Notion, Figma 초대를 수락한다.
 
 ### 회의사진
-![meeting_0315](./imgs/meeting_0315.png)
-
-
+<img src="./imgs/meeting_0315.png" alt="회의사진" width="400" height="300">
     
 # **2차 회의**
 
@@ -53,7 +51,8 @@
         - 등록은 JavaScript로 간단하게 구현한 웹 인터페이스를 활용한다.
     - 추후 개발 일정 논의
         - 아래와 같이 개발 일정 설계 및 간트 차트 제작했다.
-        ![Gantt Chart_0417](./imgs/Gantt%20Chart_0417.png)
+        <img src="./imgs/Gantt%20Chart_0417.png" alt="회의사진" height="300">
+        
         - 역할 분담 : 빨간색-이보성, 초록색-김민재, 파랑색-장주리, 보라색-합동
 - 액션 아이템
     - 이보성 : 2024년 4월 30일까지 추천 알고리즘 설계
@@ -154,7 +153,7 @@
     - 차기 회의는 차기 수업 시간인 수요일 수업시간에 진행하기로 함
 
 ### 회의사진
-![meeting_0429](./imgs/meeting_0429.png)
+<img src="./imgs/meeting_0429.png" alt="회의사진" width="400" height="300">
 
   
 # **6차 회의**
@@ -185,7 +184,7 @@
     - 차기 회의는 5월 11일 토요일 08시에 온라인으로 진행하기로 함
 
 ### 회의사진
-![meeting_0508](./imgs/meeting_0508.png)
+<img src="./imgs/meeting_0508.png" alt="회의사진" width="500">
 
   
 # **7차 회의**
@@ -210,4 +209,5 @@
     - 5월 13일 월 중간발표
 
 ### 회의사진
-![meeting_0621](./imgs/meeting_0621.png)
+<img src="./imgs/meeting_0621.png" alt="회의사진" width="500">
+
