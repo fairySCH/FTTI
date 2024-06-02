@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:ossproj_comfyride/ImageProviderNotifier.dart';
+import 'package:ossproj_comfyride/provider/ImageProviderNotifier.dart';
 import 'package:provider/provider.dart';
-import 'package:ossproj_comfyride/Style_Recommendation.dart';
+import 'package:ossproj_comfyride/screen/Style_Recommendation.dart';
 import 'package:ossproj_comfyride/ftti.dart';
 
 class explain_FTTI extends StatefulWidget {

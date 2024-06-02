@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:ossproj_comfyride/choice_style.dart';
+import 'package:ossproj_comfyride/screen/choice_style.dart';
 
 class Login_Screen extends StatefulWidget {
   const Login_Screen({super.key});

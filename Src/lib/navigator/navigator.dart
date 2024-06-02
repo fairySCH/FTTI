@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ossproj_comfyride/Style_Recommendation.dart';
 import 'package:ossproj_comfyride/ftti.dart';
+import 'package:ossproj_comfyride/screen/Style_Recommendation.dart';
 
 void navigateToStyleRecommendation(
     BuildContext context, String uid, String fttiEng, String fttiKor) async {
