@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:ossproj_comfyride/ImageProviderNotifier.dart';
+import 'package:provider/provider.dart';
 import 'package:ossproj_comfyride/Style_Recommendation.dart';
 import 'package:ossproj_comfyride/ftti.dart';
 
@@ -26,6 +24,7 @@ class _explain_FTTIState extends State<explain_FTTI> {
   String tip = '';
   String img = '';
   bool isLoading = true;
+  bool isNextPageLoading = false; // 다음 페이지 로딩 상태
 
   @override
   void initState() {
@@ -38,10 +37,8 @@ class _explain_FTTIState extends State<explain_FTTI> {
     DocumentSnapshot<Map<String, dynamic>> userDoc =
         await db.collection('users').doc(uid).get();
     if (userDoc.exists) {
-      setState(() {
-        userFTTI = userDoc.data()?['FTTI'] ?? "No FTTI available";
-        getExplain(userFTTI);
-      });
+      userFTTI = userDoc.data()?['FTTI'] ?? "No FTTI available";
+      await getExplain(userFTTI);
     } else {
       setState(() {
         FTTI_eng = "User not found";
@@ -68,6 +65,8 @@ class _explain_FTTIState extends State<explain_FTTI> {
         tip = doc['tip'] ?? "No tip available";
         isLoading = false;
       });
+      // 다음 페이지 이미지 미리 로드
+      await preloadNextPageImages();
     } else {
       setState(() {
         FTTI_kor = "No corresponding FTTI found";
@@ -76,11 +75,44 @@ class _explain_FTTIState extends State<explain_FTTI> {
     }
   }
 
+  // 다음 페이지에서 사용할 이미지를 미리 로드
+  Future<void> preloadNextPageImages() async {
+    FTTI ftti = FTTI(uid: widget.uid);
+    Map<String, double> ratios = await ftti.findAndGetBestCode();
+    List<String> urls = await getUrlsForPreload(ratios);
+
+    await Provider.of<ImageProviderNotifier>(context, listen: false)
+        .addUrls(urls, context);
+  }
+
+  // 비율에 맞는 이미지 URL들을 가져오는 함수
+  Future<List<String>> getUrlsForPreload(Map<String, double> ratios) async {
+    List<String> urls = [];
+    for (String code in ['f', 'o', 'c']) {
+      double ratio = ratios[code] ?? 0.0;
+      if (ratio > 0) {
+        QuerySnapshot querySnapshot = await db
+            .collection('data_real')
+            .where('code', isEqualTo: code)
+            .limit((30 * ratio).round())
+            .get();
+        urls.addAll(
+            querySnapshot.docs.map((doc) => doc['img'] as String).toList());
+      }
+    }
+    return urls;
+  }
+
   // Navigator를 통해 StyleRecommendation 화면으로 이동하고 데이터 전달
   void navigateToStyleRecommendation(BuildContext context) async {
+    setState(() {
+      isNextPageLoading = true; // 다음 페이지 로딩 상태 시작
+    });
+
     FTTI ftti = FTTI(uid: widget.uid);
     Map<String, double> ratios = await ftti.findAndGetBestCode();
 
+    // 페이지 이동
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -94,6 +126,10 @@ class _explain_FTTIState extends State<explain_FTTI> {
         ),
       ),
     );
+
+    setState(() {
+      isNextPageLoading = false; // 다음 페이지 로딩 상태 종료
+    });
   }
 
   @override
@@ -104,17 +140,22 @@ class _explain_FTTIState extends State<explain_FTTI> {
         floatingActionButton: Padding(
           padding: EdgeInsets.only(bottom: 10),
           child: FloatingActionButton.extended(
-            onPressed: () => navigateToStyleRecommendation(
-                context), // 버튼 클릭 시 navigateToStyleRecommendation 호출
-            label: Text(
-              '내 FTTI에 맞는 옷 추천받기',
-              style: TextStyle(color: Colors.white),
-            ),
+            onPressed: isNextPageLoading
+                ? null
+                : () => navigateToStyleRecommendation(context),
+            label: isNextPageLoading
+                ? CircularProgressIndicator(color: Colors.white)
+                : Text(
+                    '내 FTTI에 맞는 옷 추천받기',
+                    style: TextStyle(color: Colors.white),
+                  ),
             backgroundColor: Color.fromARGB(255, 39, 158, 255),
-            icon: Icon(
-              Icons.add_chart_outlined,
-              color: Colors.white,
-            ),
+            icon: isNextPageLoading
+                ? null
+                : Icon(
+                    Icons.add_chart_outlined,
+                    color: Colors.white,
+                  ),
           ),
         ),
         appBar: AppBar(

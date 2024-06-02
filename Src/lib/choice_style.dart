@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -8,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:ossproj_comfyride/explain_FTTI.dart';
 import 'package:ossproj_comfyride/ftti.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class Choice_Style extends StatefulWidget {
   final String uid;
@@ -25,22 +25,42 @@ class _Choice_Style extends State<Choice_Style> {
   bool isDone = false; // 스타일 선택 완료 여부
   var count = 0;
   List<Map<String, dynamic>> _userSelectCode = <Map<String, dynamic>>[];
+  DocumentSnapshot? _lastDocument; // 마지막으로 로드된 문서
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _loadData();
     _choiceShoweDialog();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+              _scrollController.position.maxScrollExtent &&
+          !isLoading) {
+        _loadData(); //스크롤 끝에 도달 후 로딩중이 아니면 함수 호출
+      }
+    });
   }
 
   Future<void> _loadData() async {
     if (isLoading) return; // 이미 로딩 중이면 중복 실행 방지
     setState(() => isLoading = true);
-    var querySnapshot = await db.collection('data_').get();
+
+    QuerySnapshot querySnapshot;
+    if (_lastDocument == null) {
+      querySnapshot = await db.collection('data_').limit(50).get();
+    } else {
+      querySnapshot = await db
+          .collection('data_')
+          .startAfterDocument(_lastDocument!)
+          .limit(20)
+          .get();
+    }
+
     List<Map<String, dynamic>> _newList = [];
 
     for (var doc in querySnapshot.docs) {
-      var data = doc.data();
+      var data = doc.data() as Map<String, dynamic>;
       if (data.containsKey('img') && data.containsKey('code')) {
         _newList.add({'id': doc.id, 'img': data['img'], 'code': data['code']});
         bool_Grid.add(false);
@@ -49,8 +69,12 @@ class _Choice_Style extends State<Choice_Style> {
         print('문서 ${doc.id}에 img 또는 code 필드가 없습니다.');
       }
     }
+
     setState(() {
-      _imageList = _newList;
+      _imageList.addAll(_newList);
+      if (querySnapshot.docs.isNotEmpty) {
+        _lastDocument = querySnapshot.docs.last;
+      }
       isLoading = false;
     });
   }
@@ -167,7 +191,11 @@ class _Choice_Style extends State<Choice_Style> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 20),
-                Expanded(child: grid_generator()),
+                Expanded(
+                  child: isLoading && _imageList.isEmpty
+                      ? Center(child: CircularProgressIndicator())
+                      : grid_generator(),
+                ),
               ],
             ),
             Positioned.fill(
@@ -188,82 +216,92 @@ class _Choice_Style extends State<Choice_Style> {
   }
 
   Widget grid_generator() {
-    if (_imageList.isEmpty || isLoading) {
-      // list_가 비어 있는지 확인
-      return Center(child: CircularProgressIndicator()); // 로딩 인디케이터 표시
-    }
     return MasonryGridView.builder(
+      controller: _scrollController,
       gridDelegate:
           SliverSimpleGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-      itemCount: 30,
+      itemCount: _imageList.length + (isLoading ? 1 : 0),
       mainAxisSpacing: 8,
       crossAxisSpacing: 8,
       itemBuilder: (context, index) {
+        if (index == _imageList.length) {
+          return Center(child: CircularProgressIndicator());
+        }
+
         final item = _imageList[index];
 
         return GestureDetector(
-            onTap: () {
-              setState(() {
-                if (count < 10) {
-                  if (bool_Grid[index] == false) {
-                    bool_Grid[index] = true;
-                    _userSelectCode.add({
-                      'img_id': _imageList[index]['id'],
-                      'code': _imageList[index]['code'],
-                    });
-                    count++;
-                  } else {
-                    bool_Grid[index] = false;
-                    _userSelectCode.removeWhere(
-                        (item) => item['img_id'] == _imageList[index]['id']);
-                    count--;
-                  }
-                }
-                if (count == 10) {
-                  setState(() {
-                    isDone = true;
+          onTap: () {
+            setState(() {
+              if (count < 10) {
+                if (!bool_Grid[index]) {
+                  bool_Grid[index] = true;
+                  _userSelectCode.add({
+                    'img_id': _imageList[index]['id'],
+                    'code': _imageList[index]['code'],
                   });
-                  _saveUserSelection();
-                  _explainShowDialog();
-                  _callFTTI().then((_) {
-                    setState(() {
-                      isDone = false;
-                    });
-                    Future.delayed(const Duration(milliseconds: 3500), () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  explain_FTTI(uid: widget.uid)));
-                    });
-                  });
+                  count++;
+                } else {
+                  bool_Grid[index] = false;
+                  _userSelectCode.removeWhere(
+                      (item) => item['img_id'] == _imageList[index]['id']);
+                  count--;
                 }
-              });
-            },
-            child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // 이미지 선택시 효과
-                    Opacity(
-                      opacity: bool_Grid[index] ? 0.3 : 1,
-                      child: Image.network(_imageList[index]['img']),
+              }
+              if (count == 10) {
+                setState(() {
+                  isDone = true;
+                });
+                _saveUserSelection(); //사용자가 선택한 스타일 db에 저장
+                _explainShowDialog();
+                _callFTTI().then((_) {
+                  //callFTTI 완료된 후 3.5초 이후 아래 실행
+                  Future.delayed(const Duration(milliseconds: 3500), () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                explain_FTTI(uid: widget.uid)));
+                  });
+                });
+              }
+            });
+          },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // 이미지 선택시 효과
+                Opacity(
+                  opacity: bool_Grid[index] ? 0.3 : 1,
+                  child: CachedNetworkImage(
+                    imageUrl: _imageList[index]['img'],
+                    placeholder: (context, url) => Container(
+                      color: Colors.grey[300],
                     ),
-                    if (bool_Grid[index])
-                      Container(
-                          alignment: Alignment.center,
-                          child: const Icon(
-                            Icons.check,
-                            color: Colors.blue,
-                            size: 90,
-                          )),
-                  ],
-                )));
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                if (bool_Grid[index])
+                  Container(
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.blue,
+                      size: 90,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
       },
     );
   }
 
+  //사용자 FTTI 정의
   Future<void> _callFTTI() async {
     await FTTI(uid: widget.uid).findAndGetBestCode();
   }
