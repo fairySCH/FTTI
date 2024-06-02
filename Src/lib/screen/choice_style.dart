@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:giffy_dialog/giffy_dialog.dart';
-import 'package:ossproj_comfyride/explain_FTTI.dart';
+import 'package:ossproj_comfyride/screen/explain_FTTI.dart';
 import 'package:ossproj_comfyride/ftti.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
