@@ -77,6 +77,7 @@ class _Choice_Style extends State<Choice_Style> {
       }
       isLoading = false;
     });
+    print("현재 _imageList 총 개수: ${_imageList.length}");
   }
 
   void _choiceShoweDialog() {
