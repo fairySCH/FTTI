@@ -18,7 +18,7 @@ FirebaseFirestore db = FirebaseFirestore.instance;
 class _explain_FTTIState extends State<explain_FTTI> {
   String userFTTI = '';
   String FTTI_eng = '';
-  String FTTI_kor = '';
+  String FTTI_full_eng = '';
   String exp = '';
   String sum = '';
   String tip = '';
@@ -59,7 +59,7 @@ class _explain_FTTIState extends State<explain_FTTI> {
       setState(() {
         img = doc['img'] ?? "No img available";
         FTTI_eng = doc['name_eng'] ?? "No name_eng available";
-        FTTI_kor = doc['name_kor'] ?? "No name_kor available";
+        FTTI_full_eng = doc['full_eng'] ?? "No full_name available";
         exp = doc['exp'] ?? "No explain available";
         sum = doc['sum'] ?? "No sum available";
         tip = doc['tip'] ?? "No tip available";
@@ -69,7 +69,7 @@ class _explain_FTTIState extends State<explain_FTTI> {
       await preloadNextPageImages();
     } else {
       setState(() {
-        FTTI_kor = "No corresponding FTTI found";
+        FTTI_full_eng = "No corresponding FTTI found";
         isLoading = false;
       });
     }
@@ -119,7 +119,7 @@ class _explain_FTTIState extends State<explain_FTTI> {
         builder: (context) => StyleRecommendation(
           uid: widget.uid,
           FTTI_eng: FTTI_eng,
-          FTTI_kor: FTTI_kor,
+          FTTI_full_eng: FTTI_full_eng,
           bestF: ratios['bestF']!,
           bestO: ratios['bestO']!,
           bestC: ratios['bestC']!,
@@ -191,7 +191,7 @@ class _explain_FTTIState extends State<explain_FTTI> {
               children: [
                 Padding(padding: EdgeInsets.only(top: 10)),
                 Text(
-                  FTTI_kor,
+                  FTTI_full_eng,
                   style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
