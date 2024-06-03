@@ -19,7 +19,7 @@ class _Login_ScreenState extends State<Login_Screen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(''),
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF2196F3),
       ),
       body: SafeArea(
         child: Container(
@@ -35,7 +35,7 @@ class _Login_ScreenState extends State<Login_Screen> {
                     'FTTI',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 70,
+                      fontSize: 75,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -44,14 +44,14 @@ class _Login_ScreenState extends State<Login_Screen> {
               Center(
                 child: Text(
                   'Fashion Tendency Types Indicator',
-                  style: TextStyle(color: Colors.white, fontSize: 20),
+                  style: TextStyle(color: Colors.white, fontSize: 23),
                 ),
               ),
               SizedBox(height: 200),
               Center(
                 child: Text(
                   '알려줘, 나의 패션 코드!',
-                  style: TextStyle(color: Colors.white, fontSize: 25),
+                  style: TextStyle(color: Colors.white, fontSize: 30),
                 ),
               ),
               SizedBox(height: 130),
