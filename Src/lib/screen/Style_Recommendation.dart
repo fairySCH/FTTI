@@ -9,7 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 class StyleRecommendation extends StatefulWidget {
   final String uid;
   final String FTTI_eng;
-  final String FTTI_kor;
+  final String FTTI_full_eng;
   final double bestF;
   final double bestO;
   final double bestC;
@@ -17,7 +17,7 @@ class StyleRecommendation extends StatefulWidget {
   StyleRecommendation({
     required this.uid,
     required this.FTTI_eng,
-    required this.FTTI_kor,
+    required this.FTTI_full_eng,
     required this.bestF,
     required this.bestO,
     required this.bestC,
@@ -178,7 +178,7 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
               children: [
                 SizedBox(height: 10),
                 Text(
-                  "'${widget.FTTI_kor}(${widget.FTTI_eng})' 맞춤 패션 추천",
+                  "'${widget.FTTI_full_eng}(${widget.FTTI_eng})' 맞춤 패션 추천",
                   style: TextStyle(fontSize: 18),
                   textAlign: TextAlign.center,
                 ),
