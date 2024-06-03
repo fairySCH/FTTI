@@ -32,25 +32,32 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
   FirebaseFirestore db = FirebaseFirestore.instance;
   List<Map<String, dynamic>> list_ = [];
   bool isLoading = false; // 로딩 상태 추적
+  bool initialLoading = true; // 첫 로딩 상태 추적
+  bool _isLoadingMore = false; // 추가 데이터 로딩 상태 추적
   DocumentSnapshot? _lastDocument; // 마지막으로 로드된 문서
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _loadData(initial: true);
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
               _scrollController.position.maxScrollExtent &&
-          !isLoading) {
+          !_isLoadingMore) {
         _loadData();
       }
     });
   }
 
-  Future<void> _loadData() async {
-    if (isLoading) return; // 이미 로딩 중이면 중복 실행 방지
-    setState(() => isLoading = true);
+  Future<void> _loadData({bool initial = false}) async {
+    if (isLoading || _isLoadingMore) return; // 이미 로딩 중이면 중복 실행 방지
+
+    if (initial) {
+      setState(() => isLoading = true);
+    } else {
+      setState(() => _isLoadingMore = true);
+    }
 
     QuerySnapshot querySnapshot;
     if (_lastDocument == null) {
@@ -98,14 +105,15 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
     newList.addAll(oList);
     newList.addAll(cList);
 
-    print('총 추가된 이미지 개수: ${newList.length}');
-
     setState(() {
       list_.addAll(newList); // 중복 제거 후 리스트 병합
       if (querySnapshot.docs.isNotEmpty) {
         _lastDocument = querySnapshot.docs.last;
       }
       isLoading = false;
+      initialLoading = false;
+      _isLoadingMore = false;
+      print('현재 list_ 총 개수 : ${list_.length}');
     });
 
     // 이미지 URL들을 provider에 추가
@@ -132,11 +140,6 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
     int count = (totalFilteredDocs * ratio).round();
 
     var selectedData = filteredDataList.take(count).toList();
-
-    // code 필드를 콘솔에 출력
-    for (var data in selectedData) {
-      print('Code: ${data['code']}');
-    }
 
     return selectedData;
   }
@@ -184,10 +187,15 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
                 ),
                 SizedBox(height: 20),
                 Expanded(
-                  child: isLoading
+                  child: initialLoading
                       ? Center(child: CircularProgressIndicator())
                       : gridGenerator(context),
                 ),
+                if (_isLoadingMore)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(),
+                  ),
               ],
             ),
           ],
