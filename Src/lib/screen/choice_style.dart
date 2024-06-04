@@ -5,9 +5,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:giffy_dialog/giffy_dialog.dart';
-import 'package:ossproj_comfyride/screen/explain_FTTI.dart';
 import 'package:ossproj_comfyride/ftti.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ossproj_comfyride/screen/main_screen.dart';
 
 class Choice_Style extends StatefulWidget {
   final String uid;
@@ -88,7 +88,7 @@ class _Choice_Style extends State<Choice_Style> {
           return GiffyDialog.image(
             Image.network(
               "https://raw.githubusercontent.com/Shashank02051997/FancyGifDialog-Android/master/GIF's/gif15.gif",
-              height: 400,
+              height: 200,
               fit: BoxFit.cover,
             ),
             title: const Text(
@@ -116,102 +116,65 @@ class _Choice_Style extends State<Choice_Style> {
     });
   }
 
-  void _explainShowDialog() {
-    Future.delayed(const Duration(milliseconds: 3000), () {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return GiffyDialog.image(
-            Image.network(
-              "https://raw.githubusercontent.com/Shashank02051997/FancyGifDialog-Android/master/GIF's/gif16.gif",
-              height: 300,
-              fit: BoxFit.cover,
-            ),
-            title: Text(
-              '나만의 FTTI 생성이\n완료 됐습니다.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  '보러가기',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-          );
-        },
-      );
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context); // 이전 화면으로 돌아감
-            },
-          ),
-          title: Text(
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false, // 뒤로가기 버튼 숨기기
+        title: Center(
+          child: Text(
             'FTTI',
-            style: TextStyle(color: Colors.white, fontSize: 30),
+            style: TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30),
           ),
-          centerTitle: true,
-          backgroundColor: Colors.blue,
         ),
-        body: Stack(
-          children: [
-            Container(
-              color: Colors.blue,
-            ),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
+        backgroundColor: Colors.blue,
+      ),
+      body: Stack(
+        children: [
+          Container(
+            color: Colors.blue,
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
               ),
             ),
-            SizedBox(
-              height: 5,
-            ),
-            Column(
-              children: [
-                SizedBox(height: 10),
-                Text(
-                  '취향에 맞는 옷을 선택해주세요\n ${count.toString()}/10개',
-                  style: TextStyle(fontSize: 20),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 20),
-                Expanded(
-                  child: isLoading && _imageList.isEmpty
-                      ? Center(child: CircularProgressIndicator())
-                      : grid_generator(),
-                ),
-              ],
-            ),
-            Positioned.fill(
-              child: Align(
-                alignment: Alignment.center,
-                child: isDone
-                    ? SizedBox(
-                        width: 100,
-                        height: 100,
-                        child: CircularProgressIndicator())
-                    : Container(),
+          ),
+          SizedBox(
+            height: 5,
+          ),
+          Column(
+            children: [
+              SizedBox(height: 10),
+              Text(
+                '취향에 맞는 옷을 선택해주세요\n ${count.toString()}/10개',
+                style: TextStyle(fontSize: 20),
+                textAlign: TextAlign.center,
               ),
+              SizedBox(height: 20),
+              Expanded(
+                child: isLoading && _imageList.isEmpty
+                    ? Center(child: CircularProgressIndicator())
+                    : grid_generator(),
+              ),
+            ],
+          ),
+          Positioned.fill(
+            child: Align(
+              alignment: Alignment.center,
+              child: isDone
+                  ? SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: CircularProgressIndicator())
+                  : Container(),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -228,8 +191,6 @@ class _Choice_Style extends State<Choice_Style> {
         if (index == _imageList.length) {
           return Center(child: CircularProgressIndicator());
         }
-
-        final item = _imageList[index];
 
         return GestureDetector(
           onTap: () {
@@ -254,15 +215,16 @@ class _Choice_Style extends State<Choice_Style> {
                   isDone = true;
                 });
                 _saveUserSelection(); //사용자가 선택한 스타일 db에 저장
-                _explainShowDialog();
+                Dialog();
                 _callFTTI().then((_) {
                   //callFTTI 완료된 후 3.5초 이후 아래 실행
                   Future.delayed(const Duration(milliseconds: 3500), () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                explain_FTTI(uid: widget.uid)));
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            MainScreen(uid: widget.uid, initialIndex: 1),
+                      ),
+                    );
                   });
                 });
               }
@@ -304,7 +266,7 @@ class _Choice_Style extends State<Choice_Style> {
 
   //사용자 FTTI 정의
   Future<void> _callFTTI() async {
-    await FTTI(uid: widget.uid).findAndGetBestCode();
+    await FTTI(uid: widget.uid).findAndGetBestCode(widget.uid);
   }
 
   // Firestore에 user별 선택한 스타일 추가

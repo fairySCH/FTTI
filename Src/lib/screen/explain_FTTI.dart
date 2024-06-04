@@ -1,8 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:ossproj_comfyride/provider/ImageProviderNotifier.dart';
+import 'package:ossproj_comfyride/screen/main_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:ossproj_comfyride/screen/Style_Recommendation.dart';
 import 'package:ossproj_comfyride/ftti.dart';
 
 class explain_FTTI extends StatefulWidget {
@@ -34,55 +36,83 @@ class _explain_FTTIState extends State<explain_FTTI> {
 
   // 사용자 FTTI 불러옴
   Future<void> getUserFTTI(String uid) async {
-    DocumentSnapshot<Map<String, dynamic>> userDoc =
-        await db.collection('users').doc(uid).get();
-    if (userDoc.exists) {
-      userFTTI = userDoc.data()?['FTTI'] ?? "No FTTI available";
-      await getExplain(userFTTI);
-    } else {
-      setState(() {
-        FTTI_eng = "User not found";
-        isLoading = false;
-      });
+    try {
+      DocumentSnapshot<Map<String, dynamic>> userDoc =
+          await db.collection('users').doc(uid).get();
+      if (userDoc.exists) {
+        userFTTI = userDoc.data()?['name_eng'] ?? "No FTTI available";
+        await getExplain(userFTTI);
+      } else {
+        if (mounted) {
+          setState(() {
+            FTTI_eng = "User not found";
+            isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          FTTI_eng = "Error fetching data";
+          isLoading = false;
+        });
+      }
     }
   }
 
   // 사용자 FTTI에 맞는 설명 불러옴
   Future<void> getExplain(String FTTI) async {
-    QuerySnapshot<Map<String, dynamic>> querySnapshot = await db
-        .collection('explain_FTTI')
-        .where('name_eng', isEqualTo: FTTI)
-        .get();
+    try {
+      QuerySnapshot<Map<String, dynamic>> querySnapshot = await db
+          .collection('explain_FTTI')
+          .where('name_eng', isEqualTo: FTTI)
+          .get();
 
-    if (querySnapshot.docs.isNotEmpty) {
-      var doc = querySnapshot.docs.first;
-      setState(() {
-        img = doc['img'] ?? "No img available";
-        FTTI_eng = doc['name_eng'] ?? "No name_eng available";
-        FTTI_full_eng = doc['full_eng'] ?? "No full_name available";
-        exp = doc['exp'] ?? "No explain available";
-        sum = doc['sum'] ?? "No sum available";
-        tip = doc['tip'] ?? "No tip available";
-        isLoading = false;
-      });
-      // 다음 페이지 이미지 미리 로드
-      await preloadNextPageImages();
-    } else {
-      setState(() {
-        FTTI_full_eng = "No corresponding FTTI found";
-        isLoading = false;
-      });
+      if (querySnapshot.docs.isNotEmpty) {
+        var doc = querySnapshot.docs.first;
+        if (mounted) {
+          setState(() {
+            img = doc['img'] ?? "No img available";
+            FTTI_eng = doc['name_eng'] ?? "No name_eng available";
+            FTTI_full_eng = doc['full_eng'] ?? "No full_name available";
+            exp = doc['exp'] ?? "No explain available";
+            sum = doc['sum'] ?? "No sum available";
+            tip = doc['tip'] ?? "No tip available";
+            isLoading = false;
+          });
+        }
+        // 다음 페이지 이미지 미리 로드
+        await preloadNextPageImages();
+      } else {
+        if (mounted) {
+          setState(() {
+            FTTI_full_eng = "No corresponding FTTI found";
+            isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          FTTI_full_eng = "Error fetching data";
+          isLoading = false;
+        });
+      }
     }
   }
 
   // 다음 페이지에서 사용할 이미지를 미리 로드
   Future<void> preloadNextPageImages() async {
-    FTTI ftti = FTTI(uid: widget.uid);
-    Map<String, double> ratios = await ftti.findAndGetBestCode();
-    List<String> urls = await getUrlsForPreload(ratios);
+    try {
+      FTTI ftti = FTTI(uid: widget.uid);
+      Map<String, double> ratios = await ftti.findAndGetBestCode(widget.uid);
+      List<String> urls = await getUrlsForPreload(ratios);
 
-    await Provider.of<ImageProviderNotifier>(context, listen: false)
-        .addUrls(urls, context);
+      await Provider.of<ImageProviderNotifier>(context, listen: false)
+          .addUrls(urls, context);
+    } catch (e) {
+      print('Error preloading images: $e');
+    }
   }
 
   // 비율에 맞는 이미지 URL들을 가져오는 함수
@@ -110,19 +140,20 @@ class _explain_FTTIState extends State<explain_FTTI> {
     });
 
     FTTI ftti = FTTI(uid: widget.uid);
-    Map<String, double> ratios = await ftti.findAndGetBestCode();
+    Map<String, double> ratios = await ftti.findAndGetBestCode(widget.uid);
 
     // 페이지 이동
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => StyleRecommendation(
+        builder: (context) => MainScreen(
           uid: widget.uid,
           FTTI_eng: FTTI_eng,
           FTTI_full_eng: FTTI_full_eng,
           bestF: ratios['bestF']!,
           bestO: ratios['bestO']!,
           bestC: ratios['bestC']!,
+          initialIndex: 2,
         ),
       ),
     );
@@ -132,120 +163,127 @@ class _explain_FTTIState extends State<explain_FTTI> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        floatingActionButton: Padding(
-          padding: EdgeInsets.only(bottom: 10),
-          child: FloatingActionButton.extended(
-            onPressed: isNextPageLoading
-                ? null
-                : () => navigateToStyleRecommendation(context),
-            label: isNextPageLoading
-                ? CircularProgressIndicator(color: Colors.white)
-                : Text(
-                    '내 FTTI에 맞는 옷 추천받기',
-                    style: TextStyle(color: Colors.white),
-                  ),
-            backgroundColor: Color.fromARGB(255, 39, 158, 255),
-            icon: isNextPageLoading
-                ? null
-                : Icon(
-                    Icons.add_chart_outlined,
-                    color: Colors.white,
-                  ),
-          ),
-        ),
-        appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context); // 이전 화면으로 돌아감
-            },
-          ),
-          title: Text(
-            'FTTI',
-            style: TextStyle(color: Colors.white, fontSize: 30),
-          ),
-          centerTitle: true,
-          backgroundColor: Colors.blue,
-        ),
-        body: Stack(
-          children: [
-            Container(
-              color: Colors.blue,
+  void _explainShowDialog() {
+    Future.delayed(const Duration(milliseconds: 3000), () {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return GiffyDialog.image(
+            Image.network(
+              "https://raw.githubusercontent.com/Shashank02051997/FancyGifDialog-Android/master/GIF's/gif16.gif",
+              height: 300,
+              fit: BoxFit.cover,
             ),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
+            title: Text(
+              '나만의 FTTI 생성이\n완료 됐습니다.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 5),
-            Column(
-              children: [
-                Padding(padding: EdgeInsets.only(top: 10)),
-                Text(
-                  FTTI_full_eng,
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => MainScreen(uid: widget.uid),
+                    ),
+                  );
+                },
+                child: const Text(
+                  '보러가기',
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 15),
-                Container(
-                  height: 300,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: isLoading
-                        ? Center(child: CircularProgressIndicator())
-                        : Image.network(
-                            img,
-                            loadingBuilder: (BuildContext context, Widget child,
-                                ImageChunkEvent? loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes !=
-                                          null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          (loadingProgress.expectedTotalBytes ??
-                                              1)
-                                      : null,
-                                  // 이미지가 로드되는 동안 로딩 인디케이터를 표시
-                                ),
-                              );
-                            },
+              ),
+            ],
+          );
+        },
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false, // 뒤로가기 버튼 숨기기
+        title: Center(
+          child: Text(
+            'FTTI',
+            style: TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30),
+          ),
+        ),
+        backgroundColor: Colors.blue,
+      ),
+      body: Stack(
+        children: [
+          Container(
+            color: Colors.blue,
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+          ),
+          SizedBox(height: 5),
+          Column(
+            children: [
+              Padding(padding: EdgeInsets.only(top: 10)),
+              Text(
+                '당신의 FTTI는? ',
+                style: TextStyle(fontSize: 20),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                FTTI_full_eng,
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 15),
+              Container(
+                height: 300,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : CachedNetworkImage(
+                          imageUrl: img,
+                          placeholder: (context, url) => Center(
+                            child: CircularProgressIndicator(),
                           ),
-                  ),
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
+                          // 이미지가 로드되는 동안 로딩 인디케이터를 표시
+                        ),
                 ),
-                Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 0),
-                      child: Column(
-                        children: [
-                          Container(
-                              width: MediaQuery.of(context).size.width *
-                                  0.85, //전체 가로의 85%
-                              child: Text(
-                                " " + exp + "\n\n" + tip,
-                                style: TextStyle(fontSize: 16),
-                              ))
-                        ],
-                      ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(20),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 0),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.85,
+                          child: Text(
+                            " " + exp + "\n\n" + tip,
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        )
+                      ],
                     ),
                   ),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

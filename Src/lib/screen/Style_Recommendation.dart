@@ -48,6 +48,13 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
         _loadData();
       }
     });
+
+    print('UID: ${widget.uid}');
+    print('FTTI_eng: ${widget.FTTI_eng}');
+    print('FTTI_full_eng: ${widget.FTTI_full_eng}');
+    print('bestF: ${widget.bestF}');
+    print('bestO: ${widget.bestO}');
+    print('bestC: ${widget.bestC}');
   }
 
   Future<void> _loadData({bool initial = false}) async {
@@ -146,62 +153,71 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context); // 이전 화면으로 돌아감
-            },
-          ),
-          title: Text(
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false, // 뒤로가기 버튼 숨기기
+        title: Center(
+          child: Text(
             'FTTI',
-            style: TextStyle(color: Colors.white, fontSize: 30),
+            style: TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30),
           ),
-          centerTitle: true,
-          backgroundColor: Colors.blue,
         ),
-        body: Stack(
-          children: [
-            Container(
-              color: Colors.blue,
-            ),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
+        backgroundColor: Colors.blue,
+      ),
+      body: Stack(
+        children: [
+          Container(
+            color: Colors.blue,
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
               ),
             ),
-            Column(
-              children: [
-                SizedBox(height: 10),
-                Text(
-                  "'${widget.FTTI_full_eng}(${widget.FTTI_eng})' 맞춤 패션 추천",
-                  style: TextStyle(fontSize: 18),
-                  textAlign: TextAlign.center,
+          ),
+          Column(
+            children: [
+              SizedBox(height: 10),
+              Text(
+                "'${widget.FTTI_full_eng}(${widget.FTTI_eng})' 맞춤 패션 추천",
+                style: TextStyle(fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 20),
+              Expanded(
+                child: initialLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : gridGenerator(context),
+              ),
+              if (_isLoadingMore)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator(),
                 ),
-                SizedBox(height: 20),
-                Expanded(
-                  child: initialLoading
-                      ? Center(child: CircularProgressIndicator())
-                      : gridGenerator(context),
-                ),
-                if (_isLoadingMore)
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: CircularProgressIndicator(),
-                  ),
-              ],
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent &&
+        !_isLoadingMore) {
+      _loadData();
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Widget gridGenerator(BuildContext context) {
