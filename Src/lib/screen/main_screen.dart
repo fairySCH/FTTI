@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:ossproj_comfyride/screen/Style_Recommendation.dart';
 import 'package:ossproj_comfyride/screen/choice_style.dart';
 import 'package:ossproj_comfyride/screen/explain_FTTI.dart';
-import 'package:ossproj_comfyride/screen/today_recommedation.dart';
+import 'package:ossproj_comfyride/screen/today_recommendation.dart';
 
 class MainScreen extends StatefulWidget {
   final String uid;
