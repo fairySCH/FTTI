@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:ossproj_comfyride/provider/ImageProviderNotifier.dart';
 import 'package:provider/provider.dart';
@@ -36,6 +37,7 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
   bool _isLoadingMore = false; // 추가 데이터 로딩 상태 추적
   DocumentSnapshot? _lastDocument; // 마지막으로 로드된 문서
   final ScrollController _scrollController = ScrollController();
+  final Random _random = Random();
 
   @override
   void initState() {
@@ -111,6 +113,9 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
     newList.addAll(fList);
     newList.addAll(oList);
     newList.addAll(cList);
+
+    // 리스트를 섞음
+    newList.shuffle(_random);
 
     setState(() {
       list_.addAll(newList); // 중복 제거 후 리스트 병합

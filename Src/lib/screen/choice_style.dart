@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +28,7 @@ class _Choice_Style extends State<Choice_Style> {
   List<Map<String, dynamic>> _userSelectCode = <Map<String, dynamic>>[];
   DocumentSnapshot? _lastDocument; // 마지막으로 로드된 문서
   final ScrollController _scrollController = ScrollController();
+  final Random _random = Random(); // 랜덤 인스턴스 생성
 
   @override
   void initState() {
@@ -69,6 +71,9 @@ class _Choice_Style extends State<Choice_Style> {
         print('문서 ${doc.id}에 img 또는 code 필드가 없습니다.');
       }
     }
+
+    // 새로 추가된 데이터를 랜덤으로 섞음
+    _newList.shuffle(_random);
 
     setState(() {
       _imageList.addAll(_newList);
