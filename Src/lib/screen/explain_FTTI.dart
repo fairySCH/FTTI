@@ -230,58 +230,60 @@ class _explain_FTTIState extends State<explain_FTTI> {
             ),
           ),
           SizedBox(height: 5),
-          Column(
-            children: [
-              Padding(padding: EdgeInsets.only(top: 10)),
-              Text(
-                '당신의 FTTI는? ',
-                style: TextStyle(fontSize: 20),
-                textAlign: TextAlign.center,
-              ),
-              Text(
-                FTTI_full_eng,
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 15),
-              Container(
-                height: 300,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: isLoading
-                      ? Center(child: CircularProgressIndicator())
-                      : CachedNetworkImage(
-                          imageUrl: img,
-                          placeholder: (context, url) => Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                          errorWidget: (context, url, error) =>
-                              Icon(Icons.error),
-                          // 이미지가 로드되는 동안 로딩 인디케이터를 표시
-                        ),
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                Padding(padding: EdgeInsets.only(top: 10)),
+                Text(
+                  '당신의 FTTI는? ',
+                  style: TextStyle(fontSize: 20),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(20),
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 0),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.85,
-                          child: Text(
-                            " " + exp + "\n\n" + tip,
-                            style: TextStyle(fontSize: 16),
+                Text(
+                  FTTI_full_eng,
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 15),
+                Container(
+                  height: 300,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: isLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : CachedNetworkImage(
+                            imageUrl: img,
+                            placeholder: (context, url) => Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            errorWidget: (context, url, error) =>
+                                Icon(Icons.error),
+                            // 이미지가 로드되는 동안 로딩 인디케이터를 표시
                           ),
-                        )
-                      ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 0),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.85,
+                            child: Text(
+                              " " + exp + "\n\n" + tip,
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
