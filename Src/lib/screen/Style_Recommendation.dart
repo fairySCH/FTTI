@@ -117,21 +117,23 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
     // 리스트를 섞음
     newList.shuffle(_random);
 
-    setState(() {
-      list_.addAll(newList); // 중복 제거 후 리스트 병합
-      if (querySnapshot.docs.isNotEmpty) {
-        _lastDocument = querySnapshot.docs.last;
-      }
-      isLoading = false;
-      initialLoading = false;
-      _isLoadingMore = false;
-      print('현재 list_ 총 개수 : ${list_.length}');
-    });
+    if (mounted) {
+      setState(() {
+        list_.addAll(newList); // 중복 제거 후 리스트 병합
+        if (querySnapshot.docs.isNotEmpty) {
+          _lastDocument = querySnapshot.docs.last;
+        }
+        isLoading = false;
+        initialLoading = false;
+        _isLoadingMore = false;
+        print('현재 list_ 총 개수 : ${list_.length}');
+      });
 
-    // 이미지 URL들을 provider에 추가
-    List<String> urls = newList.map((item) => item['img'] as String).toList();
-    Provider.of<ImageProviderNotifier>(context, listen: false)
-        .addUrls(urls, context); // context 전달
+      // 이미지 URL들을 provider에 추가
+      List<String> urls = newList.map((item) => item['img'] as String).toList();
+      Provider.of<ImageProviderNotifier>(context, listen: false)
+          .addUrls(urls, context); // context 전달
+    }
   }
 
   Future<List<Map<String, dynamic>>> _getDataByRatio(
