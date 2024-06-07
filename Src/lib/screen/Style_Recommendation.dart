@@ -2,10 +2,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:ossproj_comfyride/provider/ImageProviderNotifier.dart';
 import 'package:ossproj_comfyride/screen/Cart_Screen.dart';
+import 'package:ossproj_comfyride/screen/Login_Screen.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class StyleRecommendation extends StatefulWidget {
@@ -33,6 +35,7 @@ class StyleRecommendation extends StatefulWidget {
 class _StyleRecommendationState extends State<StyleRecommendation> {
   FirebaseFirestore db = FirebaseFirestore.instance;
   List<Map<String, dynamic>> list_ = [];
+  List<Map<String, dynamic>> recommendationList = [];
   var list_cart = [];
   bool isLoading = false; // 로딩 상태 추적
   bool initialLoading = true; // 첫 로딩 상태 추적
@@ -52,13 +55,6 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
         _loadData();
       }
     });
-
-    print('UID: ${widget.uid}');
-    print('FTTI_eng: ${widget.FTTI_eng}');
-    print('FTTI_full_eng: ${widget.FTTI_full_eng}');
-    print('bestF: ${widget.bestF}');
-    print('bestO: ${widget.bestO}');
-    print('bestC: ${widget.bestC}');
   }
 
   Future<void> _loadData({bool initial = false}) async {
@@ -81,12 +77,10 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
           .get();
     }
 
-    List<Map<String, dynamic>> newList = [];
-
     for (var doc in querySnapshot.docs) {
       var data = doc.data() as Map<String, dynamic>;
       if (!list_.any((item) => item['img'] == data['img'])) {
-        newList.add({
+        list_.add({
           'img': data['img'],
           'link': data['link'],
           'code': data['code'],
@@ -99,29 +93,28 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
     double o = widget.bestO;
     double c = widget.bestC;
 
-    var currentList = [...list_, ...newList];
-    var fList = await _getDataByRatio('f', f, currentList);
-    currentList.addAll(fList);
-    var oList = await _getDataByRatio('o', o, currentList);
-    currentList.addAll(oList);
-    var cList = await _getDataByRatio('c', c, currentList);
-    currentList.addAll(cList);
+    var fList = await _getDataByRatio('f', f, list_);
+    var oList = await _getDataByRatio('o', o, list_);
+    var cList = await _getDataByRatio('c', c, [...list_, ...fList, ...oList]);
 
     print('Best f: $f, Best o: $o, Best c: $c');
     print('f 추가된 개수: ${fList.length}');
     print('o 추가된 개수: ${oList.length}');
     print('c 추가된 개수: ${cList.length}');
 
-    newList.addAll(fList);
-    newList.addAll(oList);
-    newList.addAll(cList);
+    recommendationList.addAll(fList);
+    recommendationList.addAll(oList);
+    recommendationList.addAll(cList);
 
     // 리스트를 섞음
-    newList.shuffle(_random);
+    recommendationList.shuffle(_random);
+
+    for (int i = 0; i < recommendationList.length; i++) {
+      print(recommendationList[i]['code']);
+    }
 
     if (mounted) {
       setState(() {
-        list_.addAll(newList); // 중복 제거 후 리스트 병합
         if (querySnapshot.docs.isNotEmpty) {
           _lastDocument = querySnapshot.docs.last;
         }
@@ -130,13 +123,13 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
         _isLoadingMore = false;
         print('현재 list_ 총 개수 : ${list_.length}');
 
-        for(var i=0; i< list_.length; i++){
+        for (var i = 0; i < list_.length; i++) {
           list_cart.add(false);
         }
       });
 
       // 이미지 URL들을 provider에 추가
-      List<String> urls = newList.map((item) => item['img'] as String).toList();
+      List<String> urls = list_.map((item) => item['img'] as String).toList();
       Provider.of<ImageProviderNotifier>(context, listen: false)
           .addUrls(urls, context); // context 전달
     }
@@ -170,25 +163,72 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
       appBar: AppBar(
         actions: [
           // 우측의 액션 버튼들
-          IconButton(onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => Cart(uid: widget.uid, FTTI_eng: widget.FTTI_eng, FTTI_full_eng: widget.FTTI_full_eng,bestF:widget.bestF,bestO:widget.bestO,bestC:widget.bestC )));
-          }, icon: Icon(Icons.shopping_cart,color: Colors.red,)),
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => Cart(
+                            uid: widget.uid,
+                            FTTI_eng: widget.FTTI_eng,
+                            FTTI_full_eng: widget.FTTI_full_eng,
+                            bestF: widget.bestF,
+                            bestO: widget.bestO,
+                            bestC: widget.bestC)));
+              },
+              icon: Icon(
+                Icons.shopping_cart,
+                color: Colors.red,
+              )),
+          IconButton(
+            icon: Icon(Icons.exit_to_app),
+            color: Colors.white,
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text("로그아웃"),
+                    content: Text("로그아웃 됐습니다."),
+                    actions: <Widget>[
+                      TextButton(
+                        child: Text("확인"),
+                        onPressed: () async {
+                          Navigator.of(context).pop(); // 안내창 닫기
+                          SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                          await prefs.remove('isLoggedIn');
+                          await prefs.remove('uid');
+                          print('로그아웃 완료');
+                          Navigator.of(context)
+                              .pushReplacement(MaterialPageRoute(
+                            builder: (context) => Login_Screen(),
+                          )); // 로그인 페이지로 이동
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
         ],
-        leading:
-        IconButton(onPressed: () {}, icon: Icon(Icons.menu,color: Colors.transparent,)), // 왼쪽 메뉴버튼
+        leading: IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.menu,
+              color: Colors.transparent,
+            )), // 왼쪽 메뉴버튼
         automaticallyImplyLeading: false, // 뒤로가기 버튼 숨기기
         title: Center(
-          child:
-          Padding(
-            padding: EdgeInsets.only(left: 0),
-            child:   Text(
-              'FTTI',
-              style: TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30),
-            ),
-          )
-
-        ),
+            child: Padding(
+          padding: EdgeInsets.only(left: 0),
+          child: Text(
+            'FTTI',
+            style: TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30),
+          ),
+        )),
         backgroundColor: Colors.blue,
       ),
       body: Stack(
@@ -247,69 +287,56 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
   }
 
   Widget gridGenerator(BuildContext context) {
-
-
-
-
     return MasonryGridView.builder(
       controller: _scrollController,
       gridDelegate:
           SliverSimpleGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-      itemCount: list_.length, // 로딩 중이면 추가 아이템 표시
+      itemCount: recommendationList.length, // 로딩 중이면 추가 아이템 표시
       mainAxisSpacing: 5,
       crossAxisSpacing: 5,
       itemBuilder: (context, index) {
-
-        return
-          Stack(
-            children :[
-              GestureDetector(
-                    onTap: () async {
-                String shoppingMallUrl = list_[index]['link'];
-                await launchUrl(Uri.parse(shoppingMallUrl));
-              },
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                      child: CachedNetworkImage(
-                        imageUrl: list_[index]['img'],
-                          placeholder: (context, url) => Container(
-                            color: Colors.grey[300],
-                            ),
-                          errorWidget: (context, url, error) => Icon(Icons.error),
-                        fit: BoxFit.cover,
-                      ),
-                  ),
-              ),
-
-
-              GestureDetector(
-                onTap: () async {
-                  setState(() {
-                    list_cart[index] = !list_cart[index];
-                  });
-
-                  final FirebaseFirestore _db = FirebaseFirestore.instance;
-                  _db.collection('cart_data').doc().set({
-                    'uid': widget.uid,
-                    'img': list_[index]['img'],
-                    'link':list_[index]['link']
-                  });
-
-                },
-                child: Container(
-                    color: Colors.transparent,
-                    child: Padding(
-                      padding: EdgeInsets.all(15),
-                      child: Icon(
-                        Icons.shopping_cart,
-                        color: list_cart[index]?Colors.red:Colors.transparent,
-                      ),
-                    )
+        return Stack(children: [
+          GestureDetector(
+            onTap: () async {
+              String shoppingMallUrl = recommendationList[index]['link'];
+              await launchUrl(Uri.parse(shoppingMallUrl));
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: CachedNetworkImage(
+                imageUrl: recommendationList[index]['img'],
+                placeholder: (context, url) => Container(
+                  color: Colors.grey[300],
                 ),
-              )
-            ]
-          );
+                errorWidget: (context, url, error) => Icon(Icons.error),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: () async {
+              setState(() {
+                list_cart[index] = !list_cart[index];
+              });
 
+              final FirebaseFirestore _db = FirebaseFirestore.instance;
+              _db.collection('cart_data').doc().set({
+                'uid': widget.uid,
+                'img': list_[index]['img'],
+                'link': list_[index]['link']
+              });
+            },
+            child: Container(
+                color: Colors.transparent,
+                child: Padding(
+                  padding: EdgeInsets.all(15),
+                  child: Icon(
+                    Icons.shopping_cart,
+                    color: list_cart[index] ? Colors.red : Colors.transparent,
+                  ),
+                )),
+          )
+        ]);
       },
     );
   }
