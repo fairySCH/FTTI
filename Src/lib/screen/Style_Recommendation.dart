@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:ossproj_comfyride/provider/ImageProviderNotifier.dart';
+import 'package:ossproj_comfyride/screen/Cart_Screen.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -169,7 +170,9 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
       appBar: AppBar(
         actions: [
           // 우측의 액션 버튼들
-          IconButton(onPressed: () {}, icon: Icon(Icons.shopping_cart,color: Colors.red,)),
+          IconButton(onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => Cart(uid: widget.uid, FTTI_eng: widget.FTTI_eng, FTTI_full_eng: widget.FTTI_full_eng,bestF:widget.bestF,bestO:widget.bestO,bestC:widget.bestC )));
+          }, icon: Icon(Icons.shopping_cart,color: Colors.red,)),
         ],
         leading:
         IconButton(onPressed: () {}, icon: Icon(Icons.menu,color: Colors.transparent,)), // 왼쪽 메뉴버튼
@@ -257,7 +260,6 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
       crossAxisSpacing: 5,
       itemBuilder: (context, index) {
 
-
         return
           Stack(
             children :[
@@ -305,11 +307,6 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
                     )
                 ),
               )
-
-
-
-
-
             ]
           );
 
