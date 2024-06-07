@@ -1,7 +1,5 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:ossproj_comfyride/provider/ImageProviderNotifier.dart';
-import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -46,18 +44,11 @@ class _CartState extends State<Cart> {
     _loadData(initial: true);
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent &&
+              _scrollController.position.maxScrollExtent &&
           !_isLoadingMore) {
         _loadData();
       }
     });
-
-    print('UID: ${widget.uid}');
-    print('FTTI_eng: ${widget.FTTI_eng}');
-    print('FTTI_full_eng: ${widget.FTTI_full_eng}');
-    print('bestF: ${widget.bestF}');
-    print('bestO: ${widget.bestO}');
-    print('bestC: ${widget.bestC}');
   }
 
   Future<void> _loadData({bool initial = false}) async {
@@ -71,51 +62,80 @@ class _CartState extends State<Cart> {
 
     QuerySnapshot querySnapshot;
     if (_lastDocument == null) {
-      querySnapshot = await db.collection('cart_data').limit(30).get();
+      querySnapshot = await db
+          .collection('cart_data')
+          .where('uid', isEqualTo: widget.uid)
+          .limit(30)
+          .get();
     } else {
       querySnapshot = await db
           .collection('cart_data')
           .where('uid', isEqualTo: widget.uid)
+          .startAfterDocument(_lastDocument!)
+          .limit(20)
           .get();
     }
 
-
     for (var doc in querySnapshot.docs) {
       var data = doc.data() as Map<String, dynamic>;
-      print('@@@@@@@@@ : ${doc.id}');
-        list_.add({
-          'img': data['img'],
-          'link': data['link'],
-        });
+      list_.add({
+        'img': data['img'],
+        'link': data['link'],
+        'docId': doc.id, // 문서 ID를 저장하여 삭제 시 사용
+      });
     }
 
+    if (mounted) {
+      setState(() {
+        if (querySnapshot.docs.isNotEmpty) {
+          _lastDocument = querySnapshot.docs.last;
+        }
+        isLoading = false;
+        initialLoading = false;
+        _isLoadingMore = false;
+      });
+    }
+  }
+
+  //좋아요 취소 기능
+  Future<void> _removeFromCart(int index) async {
+    String docId = list_[index]['docId'];
+    await db.collection('cart_data').doc(docId).delete();
+    setState(() {
+      list_.removeAt(index);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('찜 목록에서 제거 됐습니다'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: [
-          // 우측의 액션 버튼들
-          IconButton(onPressed: () {}, icon: Icon(Icons.shopping_cart,color: Colors.transparent,)),
-        ],
-        leading:
-        IconButton(onPressed: () {
-
-          Navigator.pop(context);
-        }, icon: Icon(Icons.arrow_back)), // 왼쪽 메뉴버튼
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back),
+        ), // 왼쪽 메뉴버튼
         automaticallyImplyLeading: false, // 뒤로가기 버튼 숨기기
-        title: Center(
-            child:
-            Padding(
-              padding: EdgeInsets.only(left: 0),
-              child:   Text(
-                'FTTI',
-                style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30),
+        flexibleSpace: Container(
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 15.0), // 시스템 상태바 공간을 고려한 패딩
+            child: Text(
+              'FTTI',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 30,
               ),
-            )
-
+            ),
+          ),
         ),
         backgroundColor: Colors.blue,
       ),
@@ -138,18 +158,20 @@ class _CartState extends State<Cart> {
               SizedBox(height: 10),
               Text(
                 "찜 LIST",
-                style: TextStyle(fontSize: 18),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 20),
               Expanded(
-                child:gridGenerator(context),
+                child: initialLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : gridGenerator(context),
               ),
-              // if (_isLoadingMore)
-              //   Padding(
-              //     padding: const EdgeInsets.all(8.0),
-              //     child: CircularProgressIndicator(),
-              //   ),
+              if (_isLoadingMore)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator(),
+                ),
             ],
           ),
         ],
@@ -159,7 +181,7 @@ class _CartState extends State<Cart> {
 
   void _scrollListener() {
     if (_scrollController.position.pixels ==
-        _scrollController.position.maxScrollExtent &&
+            _scrollController.position.maxScrollExtent &&
         !_isLoadingMore) {
       _loadData();
     }
@@ -176,35 +198,45 @@ class _CartState extends State<Cart> {
     return MasonryGridView.builder(
       controller: _scrollController,
       gridDelegate:
-      SliverSimpleGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+          SliverSimpleGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
       itemCount: list_.length, // 로딩 중이면 추가 아이템 표시
       mainAxisSpacing: 5,
       crossAxisSpacing: 5,
       itemBuilder: (context, index) {
-        return
-          Stack(
-              children :[
-                GestureDetector(
-                  onTap: () async {
-                    String shoppingMallUrl = list_[index]['link'];
-                    await launchUrl(Uri.parse(shoppingMallUrl));
-                  },
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: CachedNetworkImage(
-                      imageUrl: list_[index]['img'],
-                      placeholder: (context, url) => Container(
-                        color: Colors.grey[300],
-                      ),
-                      errorWidget: (context, url, error) => Icon(Icons.error),
-                      fit: BoxFit.cover,
-                    ),
+        return Stack(
+          children: [
+            GestureDetector(
+              onTap: () async {
+                String shoppingMallUrl = list_[index]['link'];
+                await launchUrl(Uri.parse(shoppingMallUrl));
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: CachedNetworkImage(
+                  imageUrl: list_[index]['img'],
+                  placeholder: (context, url) => Container(
+                    color: Colors.grey[300],
                   ),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
+                  fit: BoxFit.cover,
                 ),
-
-              ]
-          );
-
+              ),
+            ),
+            Positioned(
+              top: 10,
+              right: 10,
+              child: IconButton(
+                icon: Icon(
+                  Icons.favorite,
+                  color: Colors.red,
+                ),
+                onPressed: () {
+                  _removeFromCart(index);
+                },
+              ),
+            ),
+          ],
+        );
       },
     );
   }

@@ -43,6 +43,7 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
   DocumentSnapshot? _lastDocument; // 마지막으로 로드된 문서
   final ScrollController _scrollController = ScrollController();
   final Random _random = Random();
+  List<bool> likedList = [];
 
   @override
   void initState() {
@@ -109,6 +110,9 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
     // 리스트를 섞음
     recommendationList.shuffle(_random);
 
+    likedList =
+        List<bool>.filled(recommendationList.length, false); // 좋아요 상태 초기화
+
     for (int i = 0; i < recommendationList.length; i++) {
       print(recommendationList[i]['code']);
     }
@@ -126,6 +130,8 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
         for (var i = 0; i < list_.length; i++) {
           list_cart.add(false);
         }
+        likedList =
+            List<bool>.filled(recommendationList.length, false); // 좋아요 상태 초기화
       });
 
       // 이미지 URL들을 provider에 추가
@@ -177,7 +183,7 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
                             bestC: widget.bestC)));
               },
               icon: Icon(
-                Icons.shopping_cart,
+                Icons.favorite,
                 color: Colors.red,
               )),
           IconButton(
@@ -213,16 +219,9 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
             },
           ),
         ],
-        leading: IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.menu,
-              color: Colors.transparent,
-            )), // 왼쪽 메뉴버튼
-        automaticallyImplyLeading: false, // 뒤로가기 버튼 숨기기
         title: Center(
             child: Padding(
-          padding: EdgeInsets.only(left: 0),
+          padding: EdgeInsets.only(left: 90),
           child: Text(
             'FTTI',
             style: TextStyle(
@@ -291,52 +290,68 @@ class _StyleRecommendationState extends State<StyleRecommendation> {
       controller: _scrollController,
       gridDelegate:
           SliverSimpleGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-      itemCount: recommendationList.length, // 로딩 중이면 추가 아이템 표시
+      itemCount: recommendationList.length,
       mainAxisSpacing: 5,
       crossAxisSpacing: 5,
       itemBuilder: (context, index) {
-        return Stack(children: [
-          GestureDetector(
-            onTap: () async {
-              String shoppingMallUrl = recommendationList[index]['link'];
-              await launchUrl(Uri.parse(shoppingMallUrl));
-            },
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: CachedNetworkImage(
-                imageUrl: recommendationList[index]['img'],
-                placeholder: (context, url) => Container(
-                  color: Colors.grey[300],
+        return Stack(
+          children: [
+            GestureDetector(
+              onTap: () async {
+                String shoppingMallUrl = recommendationList[index]['link'];
+                await launchUrl(Uri.parse(shoppingMallUrl));
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: CachedNetworkImage(
+                  imageUrl: recommendationList[index]['img'],
+                  placeholder: (context, url) => Container(
+                    color: Colors.grey[300],
+                  ),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
+                  fit: BoxFit.cover,
                 ),
-                errorWidget: (context, url, error) => Icon(Icons.error),
-                fit: BoxFit.cover,
               ),
             ),
-          ),
-          GestureDetector(
-            onTap: () async {
-              setState(() {
-                list_cart[index] = !list_cart[index];
-              });
-
-              final FirebaseFirestore _db = FirebaseFirestore.instance;
-              _db.collection('cart_data').doc().set({
-                'uid': widget.uid,
-                'img': list_[index]['img'],
-                'link': list_[index]['link']
-              });
-            },
-            child: Container(
-                color: Colors.transparent,
-                child: Padding(
-                  padding: EdgeInsets.all(15),
-                  child: Icon(
-                    Icons.shopping_cart,
-                    color: list_cart[index] ? Colors.red : Colors.transparent,
-                  ),
-                )),
-          )
-        ]);
+            Positioned(
+              bottom: 10,
+              right: 5,
+              child: IconButton(
+                icon: Icon(
+                  likedList[index] ? Icons.favorite : Icons.favorite_border,
+                  color: likedList[index] ? Colors.red : Colors.white,
+                ),
+                color: Colors.red,
+                onPressed: () {
+                  setState(() {
+                    likedList[index] = !likedList[index];
+                  });
+                  if (likedList[index]) {
+                    db.collection('cart_data').doc().set({
+                      'uid': widget.uid,
+                      'img': recommendationList[index]['img'],
+                      'link': recommendationList[index]['link']
+                    });
+                  } else {
+                    // 좋아요 취소 시 해당 데이터 삭제
+                    db
+                        .collection('cart_data')
+                        .where('uid', isEqualTo: widget.uid)
+                        .where('img',
+                            isEqualTo: recommendationList[index]['img'])
+                        .get()
+                        .then((querySnapshot) {
+                      for (var doc in querySnapshot.docs) {
+                        db.collection('cart_data').doc(doc.id).delete();
+                      }
+                    });
+                  }
+                  print('좋아요 버튼 클릭됨');
+                },
+              ),
+            ),
+          ],
+        );
       },
     );
   }
