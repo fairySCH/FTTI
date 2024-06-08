@@ -88,7 +88,8 @@ class _Login_ScreenState extends State<Login_Screen> {
                       // 신규 유저이면 스타일 선택 페이지로 이동
                       if (newUser) {
                         Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: (context) => Choice_Style(uid: _uid),
+                          builder: (context) =>
+                              Choice_Style(uid: _uid, isFirstLogin: true),
                         ));
                       } else {
                         // 기존 유저이면 MainScreen의 설명 페이지로 이동

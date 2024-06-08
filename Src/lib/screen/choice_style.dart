@@ -8,11 +8,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:ossproj_comfyride/ftti.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ossproj_comfyride/screen/Login_Screen.dart';
 import 'package:ossproj_comfyride/screen/main_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Choice_Style extends StatefulWidget {
   final String uid;
-  Choice_Style({required this.uid, super.key});
+  final bool isFirstLogin;
+  Choice_Style({required this.uid, required this.isFirstLogin, super.key});
 
   @override
   State<Choice_Style> createState() => _Choice_Style();
@@ -104,13 +107,13 @@ class _Choice_Style extends State<Choice_Style> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: screenWidth * 0.05,
+                fontSize: screenWidth * 0.06,
               ),
             ),
             content: Text(
               '마음에 드는 옷을 선택하면\n나의 FTTI를 알 수 있습니다!',
               style: TextStyle(
-                fontSize: screenWidth * 0.035,
+                fontSize: screenWidth * 0.045,
               ),
               textAlign: TextAlign.center,
             ),
@@ -134,7 +137,68 @@ class _Choice_Style extends State<Choice_Style> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      appBar: widget.isFirstLogin
+          ? AppBar(
+              centerTitle: true,
+              title: Text(
+                'FTTI',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: screenWidth * 0.08,
+                ),
+              ),
+              backgroundColor: Colors.blue,
+              actions: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.exit_to_app),
+                  color: Colors.white,
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text(
+                            "로그아웃",
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.06,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          content: Text(
+                            "로그아웃 됐습니다.",
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.045,
+                            ),
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              child: Text("확인"),
+                              onPressed: () async {
+                                Navigator.of(context).pop();
+                                SharedPreferences prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.remove('isLoggedIn');
+                                await prefs.remove('uid');
+                                print('로그아웃 완료');
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                    builder: (context) => Login_Screen(),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            )
+          : null,
       body: LayoutBuilder(
         builder: (context, constraints) {
           double screenHeight = constraints.maxHeight;
