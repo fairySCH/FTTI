@@ -198,8 +198,9 @@ FTTI(Fashion-Tendency Types Indicator) 프로젝트는 머신러닝을 활용하
 
 ##### 시퀀스 다이어그램
 
-**1. FTTI 검사, 조회, 추천 스타일 조회**
-![시퀀스1](/Doc/Diagrams/Sequence/FTTI검사_조회_추천스타일조회.png){: width="70%" height="70%"}
+###### 1. FTTI 검사, 조회, 추천 스타일 조회
+
+![시퀀스1](/Doc/Diagrams/Sequence/FTTI검사_조회_추천스타일조회.png)
 
 **다이어그램 설명:**
 이 시퀀스 다이어그램은 FTTI 검사, FTTI 조회, 추천 스타일 조회에 대한 프로세스 흐름을 보여준다. 주요 구성 요소로는 서비스 사용자, FTTI 앱, Firebase, 그리고 다양한 데이터베이스(사용자 DB, 스타일 DB, FTTI DB)가 포함된다.
@@ -220,8 +221,9 @@ FTTI(Fashion-Tendency Types Indicator) 프로젝트는 머신러닝을 활용하
   - FTTI 정보를 기반으로 추천 스타일 ID를 데이터베이스에서 가져온다.
   - 추천 스타일 ID를 사용하여 추천 스타일을 사용자에게 표시한다.
 
-**2. 스타일 찜, 찜목록 조회, 랜덤 스타일 조회**
-![시퀀스1](/Doc/Diagrams/Sequence/스타일찜_찜목록조회_randomstyle조회.png){: width="70%" height="70%"}
+###### 2. 스타일 찜, 찜목록 조회, 랜덤 스타일 조회
+
+![시퀀스2](/Doc/Diagrams/Sequence/스타일찜_찜목록조회_randomstyle조회.png)
 
 **다이어그램 설명:**
 이 시퀀스 다이어그램은 스타일 찜, 찜목록 조회, 랜덤 스타일 조회에 대한 워크플로우를 보여준다. 주요 구성 요소로는 서비스 사용자, FTTI 앱, Firebase, 그리고 데이터베이스(사용자 DB, 스타일 DB)가 포함된다.
@@ -241,8 +243,9 @@ FTTI(Fashion-Tendency Types Indicator) 프로젝트는 머신러닝을 활용하
   - FTTI 서비스는 데이터베이스에서 랜덤 스타일 ID를 가져온다.
   - 스타일 ID를 사용하여 해당 스타일 사진을 조회하고 사용자에게 표시한다.
 
-**3. 아이템 구매**
-![시퀀스1](/Doc/Diagrams/Sequence/아이템구매.png){: width="70%" height="70%"}
+###### 3. 아이템 구매
+
+![시퀀스3](/Doc/Diagrams/Sequence/아이템구매.png)
 
 **다이어그램 설명:**
 이 시퀀스 다이어그램은 아이템 구매 프로세스를 보여준다. 주요 구성 요소로는 서비스 사용자, FTTI 앱, Firebase, 그리고 데이터베이스(사용자 DB, 스타일 DB)가 포함된다.
