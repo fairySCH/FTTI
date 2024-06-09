@@ -100,7 +100,14 @@ FTTI(Fashion-Tendency Types Indicator) 프로젝트는 머신러닝을 활용하
 <img src="imgs/최종보고서_img/4-3.쇼핑몰 이동화면.png" alt="쇼핑몰이동" height=400>
 
 - "4. 스타일 추천 화면", "4.1. 찜목록 화면" 에서 스타일 사진을 선택하면 해당 스타일의 쇼핑몰 사이트로 연결된다.
-- "5. 랜덤 스타일 추천 화면" 에서 '스타일 보러 가기' 버튼 선택하면 해당 스타일을 구매할 수 있는 쇼핑몰 사이트로 연결된다.
+- "5. 랜덤 스타일 추천 화면" 에서 '스타일 보러 가기' 버튼 선택하면 해당 스타일을 구매할 수 있는 쇼핑몰 사이트로 연결된다.  
+
+#### 7. 로그아웃 팝업창
+
+<img src="imgs/최종보고서_img/6.로그아웃.png" alt="쇼핑몰이동" height=400>
+
+- "1. 로그인 화면"을 제외한 모든 화면 우측 상단의 아이콘을 선택하면 로그아웃 팝업 창이 뜬다.
+- 확인 버튼을 누르면 로그아웃이 되고, 로그인 페이지로 이동한다. 
   
 ### 3. 프로젝트 추진 내용
 
@@ -220,8 +227,8 @@ FTTI(Fashion-Tendency Types Indicator) 프로젝트는 머신러닝을 활용하
 
 ### 6. 참고문헌
 
-1. Google, 제휴ID 및 소셜 로그인, Firebase Documentation, [링크](https://firebase.google.com/docs/auth/flutter/federated-auth?hl=ko), 2023년 6월.
-2. Google, Cloud Firestore, Firebase Documentation, [링크](https://firebase.google.com/docs/firestore?hl=ko), 2023년 6월
+1. Google, 제휴ID 및 소셜 로그인, Firebase Documentation, [링크](https://ㅌfirebase.google.com/docs/auth/flutter/federated-auth?hl=ko), 2023년 8월.
+2. Google, Cloud Firestore, Firebase Documentation, [링크](https://firebase.google.com/docs/firestore?hl=ko), 2023년 3월
 3. 최완식, Sequence Diagram, 완숙의 에그머니🥚, [링크](https://velog.io/@wansook0316/Sequence-Diagram), 2023년 5월
 4. ChatGPT
 
